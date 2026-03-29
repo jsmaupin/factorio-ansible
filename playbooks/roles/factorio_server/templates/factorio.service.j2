@@ -1,0 +1,21 @@
+[Unit]
+# Managed by Ansible (role: factorio_server). Local edits will be overwritten.
+Description=Factorio Server
+After=network.target
+
+[Service]
+User={{ factorio_user }}
+Group={{ factorio_group }}
+WorkingDirectory={{ factorio_install_dir }}
+ExecStart={{ factorio_wrapper_path }}
+NoNewPrivileges={{ factorio_no_new_privileges | ternary('true', 'false') }}
+PrivateTmp={{ factorio_private_tmp | ternary('true', 'false') }}
+ProtectSystem={{ factorio_protect_system }}
+ProtectHome={{ factorio_protect_home | ternary('true', 'false') }}
+RestrictAddressFamilies={{ factorio_restrict_address_families | join(' ') }}
+CapabilityBoundingSet=
+Restart={{ factorio_service_restart }}
+RestartSec={{ factorio_service_restart_sec }}
+
+[Install]
+WantedBy=multi-user.target

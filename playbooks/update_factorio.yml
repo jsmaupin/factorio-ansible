@@ -1,0 +1,14 @@
+---
+# Update the Factorio headless binary to the latest stable release from factorio.com.
+# Preserves /var/lib/factorio (saves, mods) and /etc/factorio. Replaces only /opt/factorio.
+#
+#   ansible-playbook -i inventory.ini playbooks/update_factorio.yml
+
+- name: Update Factorio headless binary
+  hosts: factorio_servers
+  become: true
+  tasks:
+    - name: Apply Factorio headless update
+      ansible.builtin.include_role:
+        name: factorio_server
+        tasks_from: update_headless

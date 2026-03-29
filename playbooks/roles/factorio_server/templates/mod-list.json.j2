@@ -1,0 +1,7 @@
+{
+  "mods": [
+{% for mod in factorio_mods %}
+    { "name": {{ mod.name | to_json }}, "enabled": {{ mod.enabled | bool | to_json }} }{{ "," if not loop.last else "" }}
+{% endfor %}
+  ]
+}

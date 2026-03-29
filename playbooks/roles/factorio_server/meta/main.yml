@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: OpenAI
+  description: Configure a Fedora-based headless Factorio server with systemd, firewalld, saves, mods, and optional Tailscale.
+  license: MIT
+  min_ansible_version: '2.14'
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+dependencies: []

@@ -1,0 +1,82 @@
+---
+# Install / layout
+factorio_user: factorio
+factorio_group: factorio
+factorio_install_dir: /opt/factorio
+factorio_data_dir: /var/lib/factorio
+factorio_config_dir: /etc/factorio
+factorio_wrapper_path: /usr/local/bin/factorio-start
+
+# Archive handling
+factorio_archive_src: ""  # Path on the Ansible control node, e.g. files/factorio_headless_x64_2.0.73.tar.xz
+factorio_archive_tmp: /tmp/factorio_headless.tar.xz
+factorio_extract_parent: /opt
+factorio_archive_strip_top_dir: true
+
+# Upstream headless download (tasks/update_headless.yml). Official tarball has a top-level factorio/; leave false (same as tar -C /opt without --strip).
+factorio_headless_download_url: https://factorio.com/get-download/stable/headless/linux64
+factorio_headless_strip_top_dir: false
+
+# Networking / service
+factorio_port: 34197
+factorio_enable_firewalld: true
+factorio_firewalld_zone: FedoraServer
+factorio_enable_tailscale: false
+factorio_tailscale_trust_interface: true
+factorio_tailscale_manage_repo: true
+
+# Saves / startup behavior
+factorio_world_name: world.zip
+factorio_use_latest_autosave: true
+factorio_autosave_interval: 5
+factorio_autosave_slots: 5
+factorio_auto_pause: true
+
+# Server settings
+factorio_server_name: Factorio Server
+factorio_server_description: Private Factorio server
+factorio_public: false
+factorio_lan: false
+factorio_max_players: 10
+factorio_require_user_verification: true
+factorio_game_password: ""
+factorio_admins: []
+factorio_allow_commands: admins-only
+factorio_afk_autokick_interval: 0
+factorio_visibility_public: "{{ factorio_public }}"
+factorio_visibility_lan: "{{ factorio_lan }}"
+
+# Mods
+factorio_manage_mods: false
+factorio_mods_dir: "{{ factorio_data_dir }}/mods"
+factorio_mods:
+  - { name: base, enabled: true }
+  - { name: squeak-through-2, enabled: true }
+  - { name: AutoDeconstruct, enabled: true }
+  - { name: elevated-rails, enabled: true }
+  - { name: flib, enabled: true }
+  - { name: mining-patch-planner, enabled: true }
+  - { name: quality, enabled: true }
+  - { name: BottleneckLite, enabled: true }
+  - { name: RateCalculator, enabled: true }
+  - { name: space-age, enabled: true }
+
+# Optional: zip mod files to copy from the control node into factorio_mods_dir
+factorio_mod_zip_files: []
+
+# Security / sandboxing
+factorio_service_restart: on-failure
+factorio_service_restart_sec: 5
+factorio_protect_system: full
+factorio_protect_home: false
+factorio_private_tmp: true
+factorio_no_new_privileges: true
+factorio_restrict_address_families:
+  - AF_INET
+  - AF_INET6
+
+# SSH / misc
+factorio_install_extra_packages:
+  - firewalld
+  - policycoreutils-python-utils
+  - tar

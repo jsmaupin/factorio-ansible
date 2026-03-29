@@ -1,0 +1,60 @@
+---
+# Replace the headless binary tree with the latest stable download from factorio.com.
+# Expects a host already provisioned with tasks/main.yml (user, systemd unit, config, data dirs).
+
+- name: Ensure xz is installed (required to unpack .tar.xz)
+  ansible.builtin.package:
+    name: xz
+    state: present
+
+- name: Check whether Factorio service is currently active
+  ansible.builtin.command:
+    cmd: systemctl is-active factorio
+  register: factorio_update_active_check
+  changed_when: false
+  failed_when: false
+
+- name: Stop Factorio for binary update
+  ansible.builtin.service:
+    name: factorio
+    state: stopped
+  when: factorio_update_active_check.rc == 0
+
+- name: Remove existing Factorio installation directory
+  ansible.builtin.file:
+    path: "{{ factorio_install_dir }}"
+    state: absent
+
+- name: Download latest stable headless build
+  ansible.builtin.get_url:
+    url: "{{ factorio_headless_download_url }}"
+    dest: "{{ factorio_archive_tmp }}"
+    mode: "0644"
+    force: true
+
+- name: Extract Factorio headless archive into extract parent
+  ansible.builtin.unarchive:
+    src: "{{ factorio_archive_tmp }}"
+    dest: "{{ factorio_extract_parent }}"
+    remote_src: true
+    owner: root
+    group: root
+    extra_opts: "{{ ['--strip-components=1'] if factorio_headless_strip_top_dir else [] }}"
+
+- name: Set ownership on Factorio install tree
+  ansible.builtin.file:
+    path: "{{ factorio_install_dir }}"
+    state: directory
+    recurse: true
+    owner: "{{ factorio_user }}"
+    group: "{{ factorio_group }}"
+
+- name: Restore SELinux contexts on Factorio install directory
+  ansible.builtin.command: restorecon -Rv {{ factorio_install_dir }}
+  changed_when: false
+
+- name: Start Factorio if it was running before update
+  ansible.builtin.service:
+    name: factorio
+    state: started
+  when: factorio_update_active_check.rc == 0

@@ -1,0 +1,184 @@
+---
+- name: Install base packages
+  ansible.builtin.package:
+    name: "{{ factorio_install_extra_packages }}"
+    state: present
+
+- name: Ensure firewalld is enabled and running
+  ansible.builtin.service:
+    name: firewalld
+    enabled: true
+    state: started
+  when: factorio_enable_firewalld
+
+- name: Ensure Factorio group exists
+  ansible.builtin.group:
+    name: "{{ factorio_group }}"
+    state: present
+
+- name: Ensure Factorio user exists
+  ansible.builtin.user:
+    name: "{{ factorio_user }}"
+    group: "{{ factorio_group }}"
+    system: true
+    create_home: true
+    home: "/home/{{ factorio_user }}"
+    shell: /sbin/nologin
+    state: present
+
+- name: Create directory layout
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default(factorio_user) }}"
+    group: "{{ item.group | default(factorio_group) }}"
+    mode: "{{ item.mode | default('0755') }}"
+  loop:
+    - { path: "{{ factorio_install_dir }}", owner: root, group: root }
+    - { path: "{{ factorio_data_dir }}" }
+    - { path: "{{ factorio_data_dir }}/saves" }
+    - { path: "{{ factorio_mods_dir }}" }
+    - { path: "{{ factorio_config_dir }}", owner: root, group: root }
+
+- name: Copy Factorio headless archive to server
+  ansible.builtin.copy:
+    src: "{{ factorio_archive_src }}"
+    dest: "{{ factorio_archive_tmp }}"
+    mode: '0644'
+  when: factorio_archive_src | length > 0
+
+- name: Extract Factorio headless archive under /opt
+  ansible.builtin.unarchive:
+    src: "{{ factorio_archive_tmp }}"
+    dest: "{{ factorio_extract_parent }}"
+    remote_src: true
+    owner: root
+    group: root
+    extra_opts: >-
+      {{ ['--strip-components=1'] if factorio_archive_strip_top_dir else [] }}
+  when: factorio_archive_src | length > 0
+  notify: restore selinux contexts
+
+- name: Ensure Factorio install tree ownership where runtime writes may occur
+  ansible.builtin.file:
+    path: "{{ factorio_install_dir }}"
+    state: directory
+    recurse: true
+    owner: "{{ factorio_user }}"
+    group: "{{ factorio_group }}"
+  when: factorio_archive_src | length > 0
+
+- name: Deploy config-path.cfg
+  ansible.builtin.template:
+    src: config-path.cfg.j2
+    dest: "{{ factorio_config_dir }}/config-path.cfg"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart factorio
+
+- name: Deploy server-settings.json
+  ansible.builtin.template:
+    src: server-settings.json.j2
+    dest: "{{ factorio_config_dir }}/server-settings.json"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart factorio
+
+- name: Deploy mod-list.json
+  ansible.builtin.template:
+    src: mod-list.json.j2
+    dest: "{{ factorio_mods_dir }}/mod-list.json"
+    owner: "{{ factorio_user }}"
+    group: "{{ factorio_group }}"
+    mode: '0644'
+  when: factorio_manage_mods
+  notify: restart factorio
+
+- name: Copy mod zip files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ factorio_mods_dir }}/{{ item | basename }}"
+    owner: "{{ factorio_user }}"
+    group: "{{ factorio_group }}"
+    mode: '0644'
+  loop: "{{ factorio_mod_zip_files }}"
+  when: factorio_manage_mods and (factorio_mod_zip_files | length > 0)
+  notify: restart factorio
+
+- name: Deploy Factorio startup wrapper
+  ansible.builtin.template:
+    src: factorio-start.sh.j2
+    dest: "{{ factorio_wrapper_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+  notify: restart factorio
+
+- name: Deploy systemd unit
+  ansible.builtin.template:
+    src: factorio.service.j2
+    dest: /etc/systemd/system/factorio.service
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - factorio_service
+  notify:
+    - daemon reload
+    - restart factorio
+
+- name: Open Factorio UDP port in firewalld
+  ansible.posix.firewalld:
+    zone: "{{ factorio_firewalld_zone }}"
+    port: "{{ factorio_port }}/udp"
+    permanent: true
+    immediate: true
+    state: enabled
+  when: factorio_enable_firewalld
+
+- name: Allow trusted SSH over tailscale0
+  ansible.posix.firewalld:
+    zone: trusted
+    interface: tailscale0
+    permanent: true
+    immediate: true
+    state: enabled
+  when: factorio_enable_firewalld and factorio_enable_tailscale and factorio_tailscale_trust_interface
+
+- name: Install Tailscale repo
+  ansible.builtin.shell: |
+    set -euo pipefail
+    curl -fsSL https://pkgs.tailscale.com/stable/fedora/tailscale.repo -o /etc/yum.repos.d/tailscale.repo
+  args:
+    creates: /etc/yum.repos.d/tailscale.repo
+  when: factorio_enable_tailscale and factorio_tailscale_manage_repo
+
+- name: Install Tailscale
+  ansible.builtin.package:
+    name: tailscale
+    state: present
+  when: factorio_enable_tailscale
+
+- name: Enable tailscaled
+  ansible.builtin.service:
+    name: tailscaled
+    enabled: true
+    state: started
+  when: factorio_enable_tailscale
+
+- name: Restore SELinux contexts on Factorio paths
+  ansible.builtin.command: "restorecon -Rv {{ item }}"
+  changed_when: false
+  loop:
+    - "{{ factorio_install_dir }}"
+    - "{{ factorio_data_dir }}"
+    - "{{ factorio_config_dir }}"
+    - "{{ factorio_wrapper_path }}"
+
+- name: Ensure factorio service is enabled and running
+  ansible.builtin.service:
+    name: factorio
+    enabled: true
+    state: started

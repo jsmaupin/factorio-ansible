@@ -1,0 +1,26 @@
+{
+  "name": {{ factorio_server_name | to_json }},
+  "description": {{ factorio_server_description | to_json }},
+  "tags": [],
+  "max_players": {{ factorio_max_players }},
+  "visibility": {
+    "public": {{ factorio_visibility_public | bool | to_json }},
+    "lan": {{ factorio_visibility_lan | bool | to_json }}
+  },
+  "username": "",
+  "password": "",
+  "token": "",
+  "game_password": {{ factorio_game_password | to_json }},
+  "require_user_verification": {{ factorio_require_user_verification | bool | to_json }},
+  "max_upload_in_kilobytes_per_second": 0,
+  "max_upload_slots": 5,
+  "minimum_latency_in_ticks": 0,
+  "ignore_player_limit_for_returning_players": false,
+  "allow_commands": {{ factorio_allow_commands | to_json }},
+  "autosave_interval": {{ factorio_autosave_interval }},
+  "autosave_slots": {{ factorio_autosave_slots }},
+  "afk_autokick_interval": {{ factorio_afk_autokick_interval }},
+  "auto_pause": {{ factorio_auto_pause | bool | to_json }},
+  "only_admins_can_pause_the_game": true,
+  "admins": {{ factorio_admins | to_json }}
+}

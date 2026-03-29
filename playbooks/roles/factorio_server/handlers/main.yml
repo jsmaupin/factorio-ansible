@@ -1,0 +1,13 @@
+---
+- name: daemon reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: restart factorio
+  ansible.builtin.service:
+    name: factorio
+    state: restarted
+
+- name: restore selinux contexts
+  ansible.builtin.command: restorecon -Rv {{ factorio_install_dir }}
+  changed_when: false

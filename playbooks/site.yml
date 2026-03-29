@@ -1,0 +1,6 @@
+---
+- name: Configure Factorio server
+  hosts: factorio_servers
+  become: true
+  roles:
+    - role: factorio_server

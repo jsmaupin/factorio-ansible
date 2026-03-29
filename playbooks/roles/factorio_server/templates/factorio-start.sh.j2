@@ -1,0 +1,27 @@
+#!/bin/bash
+set -euo pipefail
+
+SAVE_DIR="{{ factorio_data_dir }}/saves"
+WORLD_PATH="$SAVE_DIR/{{ factorio_world_name }}"
+LATEST=""
+
+{% raw %}if compgen -G "$SAVE_DIR/_autosave*.zip" > /dev/null; then
+  LATEST=$(ls -t "$SAVE_DIR"/_autosave*.zip | head -n1)
+fi{% endraw %}
+
+{% if factorio_use_latest_autosave %}
+if [[ -n "$LATEST" ]]; then
+  START_SAVE="$LATEST"
+else
+  START_SAVE="$WORLD_PATH"
+fi
+{% else %}
+START_SAVE="$WORLD_PATH"
+{% endif %}
+
+echo "Starting Factorio with save: $START_SAVE"
+
+exec {{ factorio_install_dir }}/bin/x64/factorio \
+  --config {{ factorio_config_dir }}/config-path.cfg \
+  --start-server "$START_SAVE" \
+  --server-settings {{ factorio_config_dir }}/server-settings.json
