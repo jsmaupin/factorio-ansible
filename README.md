@@ -14,7 +14,8 @@ This package sets up a Fedora-based headless Factorio server roughly matching th
 
 ## Layout
 
-- `playbooks/site.yml` — example playbook
+- `playbooks/site.yml` — full server setup
+- `playbooks/update_factorio.yml` — upgrade `/opt/factorio` to the latest stable headless build from factorio.com (leaves saves/mods/config under `/var/lib/factorio` and `/etc/factorio`)
 - `roles/factorio_server` — reusable role
 
 ## Prerequisites
@@ -39,6 +40,29 @@ Basic run:
 ```bash
 ansible-playbook -i inventory.ini playbooks/site.yml \
   -e factorio_archive_src=files/factorio_headless_x64_2.0.73.tar.xz
+```
+
+Use any path to your inventory file (for example `-i ~/inventory.ini`).
+
+### Update headless binary
+
+After the host is provisioned with `site.yml`, download and install the latest stable headless tarball on the server (stops Factorio if running, replaces `/opt/factorio`, restarts if it was running):
+
+```bash
+ansible-playbook -i inventory.ini playbooks/update_factorio.yml
+```
+
+Dry run:
+
+```bash
+ansible-playbook -i inventory.ini playbooks/update_factorio.yml --check --diff
+```
+
+Override the download URL or strip behavior if needed:
+
+```bash
+ansible-playbook -i inventory.ini playbooks/update_factorio.yml \
+  -e factorio_headless_download_url=https://factorio.com/get-download/stable/headless/linux64
 ```
 
 ## Important variables
