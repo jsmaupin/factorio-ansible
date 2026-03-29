@@ -25,6 +25,9 @@ env/
 # vault_password
 # .vault_pass
 
+# Real inventory often contains hostnames/IPs; keep a private copy outside git or use inventory.example + copy
+inventory.ini
+
 # Editor / IDE
 .idea/
 .vscode/
