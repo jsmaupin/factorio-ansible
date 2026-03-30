@@ -89,7 +89,6 @@ factorio_mods:
 
 ## Notes
 
-- Firewall rules (for example Factorio’s default **UDP 34197**) are not managed in this package; configure them in your wrapping playbook or infrastructure repo.
 - The role assumes you already have the headless Factorio tarball on the Ansible control node.
 - SELinux relabeling is included because moving binaries/data around on Fedora often needs `restorecon`.
 - The startup wrapper uses the latest autosave if present, otherwise it falls back to `world.zip`.
