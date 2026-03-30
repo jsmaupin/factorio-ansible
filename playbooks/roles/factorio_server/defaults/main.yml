@@ -17,11 +17,6 @@ factorio_archive_strip_top_dir: true
 factorio_headless_download_url: https://factorio.com/get-download/stable/headless/linux64
 factorio_headless_strip_top_dir: false
 
-# Networking / service
-factorio_port: 34197
-factorio_enable_firewalld: true
-factorio_firewalld_zone: FedoraServer
-
 # Saves / startup behavior
 factorio_world_name: world.zip
 factorio_use_latest_autosave: true
@@ -74,6 +69,5 @@ factorio_restrict_address_families:
 
 # SSH / misc
 factorio_install_extra_packages:
-  - firewalld
   - policycoreutils-python-utils
   - tar

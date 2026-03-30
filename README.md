@@ -7,7 +7,6 @@ This package sets up a Fedora-based headless Factorio server:
 - mutable data under `/var/lib/factorio`
 - config under `/etc/factorio`
 - systemd unit with sandboxing
-- firewalld rule for UDP 34197 in the chosen zone
 - optional mod management
 - startup wrapper that can boot the newest `_autosave*.zip`
 
@@ -16,14 +15,6 @@ This package sets up a Fedora-based headless Factorio server:
 - `playbooks/site.yml` — full server setup
 - `playbooks/update_factorio.yml` — upgrade `/opt/factorio` to the latest stable headless build from factorio.com (leaves saves/mods/config under `/var/lib/factorio` and `/etc/factorio`)
 - `roles/factorio_server` — reusable role
-
-## Prerequisites
-
-Install Ansible collections (needed for `ansible.posix.firewalld`):
-
-```bash
-ansible-galaxy collection install -r requirements.yml
-```
 
 ## Quick start
 
@@ -70,7 +61,6 @@ A few you will probably want to override:
 
 ```yaml
 factorio_archive_src: files/factorio_headless_x64_2.0.73.tar.xz
-factorio_firewalld_zone: FedoraServer
 factorio_server_name: Factorio Server
 factorio_server_description: Private Factorio server
 factorio_game_password: "set-a-real-password"
@@ -99,6 +89,7 @@ factorio_mods:
 
 ## Notes
 
+- Firewall rules (for example Factorio’s default **UDP 34197**) are not managed in this package; configure them in your wrapping playbook or infrastructure repo.
 - The role assumes you already have the headless Factorio tarball on the Ansible control node.
 - SELinux relabeling is included because moving binaries/data around on Fedora often needs `restorecon`.
 - The startup wrapper uses the latest autosave if present, otherwise it falls back to `world.zip`.

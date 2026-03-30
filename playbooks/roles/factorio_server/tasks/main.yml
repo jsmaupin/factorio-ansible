@@ -4,13 +4,6 @@
     name: "{{ factorio_install_extra_packages }}"
     state: present
 
-- name: Ensure firewalld is enabled and running
-  ansible.builtin.service:
-    name: firewalld
-    enabled: true
-    state: started
-  when: factorio_enable_firewalld
-
 - name: Ensure Factorio group exists
   ansible.builtin.group:
     name: "{{ factorio_group }}"
@@ -128,15 +121,6 @@
   notify:
     - daemon reload
     - restart factorio
-
-- name: Open Factorio UDP port in firewalld
-  ansible.posix.firewalld:
-    zone: "{{ factorio_firewalld_zone }}"
-    port: "{{ factorio_port }}/udp"
-    permanent: true
-    immediate: true
-    state: enabled
-  when: factorio_enable_firewalld
 
 - name: Restore SELinux contexts on Factorio paths
   ansible.builtin.command: "restorecon -Rv {{ item }}"
