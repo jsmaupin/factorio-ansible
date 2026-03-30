@@ -1,6 +1,6 @@
 # Factorio Ansible Package
 
-This package sets up a Fedora-based headless Factorio server roughly matching the configuration we worked through:
+This package sets up a Fedora-based headless Factorio server:
 
 - non-root `factorio` service user
 - binaries under `/opt/factorio`
