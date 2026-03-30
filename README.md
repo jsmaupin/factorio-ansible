@@ -8,7 +8,6 @@ This package sets up a Fedora-based headless Factorio server:
 - config under `/etc/factorio`
 - systemd unit with sandboxing
 - firewalld rule for UDP 34197 in the chosen zone
-- optional Tailscale install + trusted `tailscale0`
 - optional mod management
 - startup wrapper that can boot the newest `_autosave*.zip`
 
@@ -77,7 +76,6 @@ factorio_server_description: Private Factorio server
 factorio_game_password: "set-a-real-password"
 factorio_admins:
   - your_factorio_username
-factorio_enable_tailscale: true
 factorio_manage_mods: true
 factorio_mod_zip_files:
   - files/mods/AutoDeconstruct_1.0.10.zip
@@ -102,7 +100,6 @@ factorio_mods:
 ## Notes
 
 - The role assumes you already have the headless Factorio tarball on the Ansible control node.
-- Tailscale installation is handled, but authentication still needs an interactive `tailscale up` or an auth key strategy.
 - SELinux relabeling is included because moving binaries/data around on Fedora often needs `restorecon`.
 - The startup wrapper uses the latest autosave if present, otherwise it falls back to `world.zip`.
 
@@ -112,7 +109,6 @@ Put this in `group_vars/factorio_servers.yml` if you want a cleaner inventory-dr
 
 ```yaml
 factorio_archive_src: files/factorio_headless_x64_2.0.73.tar.xz
-factorio_enable_tailscale: true
 factorio_manage_mods: true
 factorio_game_password: "replace-me"
 factorio_admins:

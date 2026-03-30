@@ -138,36 +138,6 @@
     state: enabled
   when: factorio_enable_firewalld
 
-- name: Allow trusted SSH over tailscale0
-  ansible.posix.firewalld:
-    zone: trusted
-    interface: tailscale0
-    permanent: true
-    immediate: true
-    state: enabled
-  when: factorio_enable_firewalld and factorio_enable_tailscale and factorio_tailscale_trust_interface
-
-- name: Install Tailscale repo
-  ansible.builtin.shell: |
-    set -euo pipefail
-    curl -fsSL https://pkgs.tailscale.com/stable/fedora/tailscale.repo -o /etc/yum.repos.d/tailscale.repo
-  args:
-    creates: /etc/yum.repos.d/tailscale.repo
-  when: factorio_enable_tailscale and factorio_tailscale_manage_repo
-
-- name: Install Tailscale
-  ansible.builtin.package:
-    name: tailscale
-    state: present
-  when: factorio_enable_tailscale
-
-- name: Enable tailscaled
-  ansible.builtin.service:
-    name: tailscaled
-    enabled: true
-    state: started
-  when: factorio_enable_tailscale
-
 - name: Restore SELinux contexts on Factorio paths
   ansible.builtin.command: "restorecon -Rv {{ item }}"
   changed_when: false

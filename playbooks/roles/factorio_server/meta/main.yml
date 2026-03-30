@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: jsmaupin
-  description: Configure a Fedora-based headless Factorio server with systemd, firewalld, saves, mods, and optional Tailscale.
+  description: Configure a Fedora-based headless Factorio server with systemd, firewalld, saves, and mods.
   license: Apache-2.0
   min_ansible_version: '2.14'
   platforms:

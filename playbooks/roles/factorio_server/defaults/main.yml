@@ -21,9 +21,6 @@ factorio_headless_strip_top_dir: false
 factorio_port: 34197
 factorio_enable_firewalld: true
 factorio_firewalld_zone: FedoraServer
-factorio_enable_tailscale: false
-factorio_tailscale_trust_interface: true
-factorio_tailscale_manage_repo: true
 
 # Saves / startup behavior
 factorio_world_name: world.zip
